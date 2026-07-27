@@ -24,14 +24,12 @@ def generate_audio():
             return jsonify({"error": "စာသား ရိုက်ထည့်ပေးပါ"}), 400
 
         if reference_audio:
-            # တင်လိုက်သော/ဖမ်းထားသော ဖိုင်ကို နာမည် ပေး၍ သိမ်းဆည်းခြင်း
             filename = reference_audio.filename or "input_voice.webm"
             ref_file_path = os.path.join(UPLOAD_FOLDER, filename)
             reference_audio.save(ref_file_path)
 
         client = Client(GRADIO_SPACE)
 
-        # Gradio Predict ခေါ်ယူခြင်း
         result = client.predict(
             text_input=text_input,
             control_instruction="",
@@ -58,7 +56,6 @@ def generate_audio():
     except Exception as e:
         return jsonify({"error": f"Backend Error: {str(e)}"}), 500
     finally:
-        # Upload လုပ်ခဲ့သော Temp File ကို ဖျက်ပစ်ခြင်း
         if ref_file_path and os.path.exists(ref_file_path):
             try:
                 os.remove(ref_file_path)
@@ -68,7 +65,7 @@ def generate_audio():
 @app.route("/get-audio/<filename>")
 def get_audio(filename):
     file_path = os.path.join(UPLOAD_FOLDER, filename)
-    return send_file(file_path, mimetype="audio/wav")
+    return send_file(file_path, mimetype="audio/wav", as_attachment=False)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
