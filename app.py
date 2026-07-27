@@ -3,13 +3,11 @@ from gradio_client import Client, handle_file
 import os
 import shutil
 import re
+import wave
 
 app = Flask(__name__)
 
-# Hugging Face Space Endpoint
 GRADIO_SPACE = "openbmb/VoxCPM-Demo"
-
-# Audio Files သိမ်းဆည်းမည့် Folder
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -29,7 +27,6 @@ def generate_audio():
         if not text_input:
             return jsonify({"error": "စာသား ရိုက်ထည့်ပေးပါ"}), 400
 
-        # Voice Clone အတွက် Upload/Record လုပ်ထားသော Audio ကို သိမ်းဆည်းခြင်း
         if reference_audio:
             filename = reference_audio.filename or "input_voice.webm"
             ref_file_path = os.path.join(UPLOAD_FOLDER, filename)
@@ -37,13 +34,10 @@ def generate_audio():
 
         client = Client(GRADIO_SPACE)
 
-        # -------------------------------------------------------------
-        # စာလုံးရေ အလွန်များပါက VoxCPM API မဟန့်သွားစေရန် စာကြောင်းအလိုက် ခွဲခြင်း
-        # -------------------------------------------------------------
-        max_chunk_size = 250  # တစ်ကြိမ်လျှင် မော်ဒယ်အတွက် အဆင်ပြေဆုံး စာလုံးရေ
+        # စာလုံးရေ ခွဲခြားခြင်း (မော်ဒယ် Timeout မဖြစ်စေရန် စာလုံး ၂၀၀ စီ ခွဲပါမည်)
+        max_chunk_size = 200  
         chunks = []
         
-        # စာကြောင်း ခွဲခြားနိုင်သည့် ပုဒ်ဖြတ်ပုဒ်ရပ်များဖြင့် ခွဲခြင်း (၊ ၊ ။ ၊ . ၊ \n)
         raw_sentences = re.split(r'(?<=[။\.\n])', text_input)
         current_chunk = ""
 
@@ -60,13 +54,10 @@ def generate_audio():
         if current_chunk.strip():
             chunks.append(current_chunk.strip())
 
-        # စာသား လုံးဝမခွဲဘဲ ၁ ကြောင်းတည်း ရှိနေပါကလည်း အဆင်ပြေအောင်
         if not chunks:
             chunks = [text_input]
 
-        # -------------------------------------------------------------
-        # စာကြောင်း အပိုင်းများအလိုက် API လှမ်းခေါ်ပြီး အသံထုတ်ခြင်း
-        # -------------------------------------------------------------
+        # Hugging Face API လှမ်းခေါ်ခြင်း
         for idx, chunk in enumerate(chunks):
             result = client.predict(
                 text_input=chunk,
@@ -80,7 +71,6 @@ def generate_audio():
                 api_name="/generate"
             )
 
-            # Gradio မှ ပြန်လာသည့် Audio File Path စစ်ဆေးခြင်း
             audio_path = result if isinstance(result, str) else result.get('path') if isinstance(result, dict) else None
             
             if audio_path and os.path.exists(audio_path):
@@ -89,30 +79,37 @@ def generate_audio():
                 output_files.append(temp_chunk_path)
 
         if not output_files:
-            return jsonify({"error": "Hugging Face API မှ အသံဖိုင် တုံ့ပြန်မှု မရရှိပါ သို့မဟုတ် မော်ဒယ် နှေးနေပါသည်။"}), 500
+            return jsonify({"error": "Hugging Face API မှ အသံဖိုင် တုံ့ပြန်မှု မရရှိပါ။"}), 500
 
         # -------------------------------------------------------------
-        # ထွက်လာသော Audio File အပိုင်းများကို တစ်ဖိုင်တည်းဖြစ်အောင် ပေါင်းစပ်ခြင်း
+        # WAV Files များကို wave module ဖြင့် စနစ်တကျ ပေါင်းစပ်ခြင်း
         # -------------------------------------------------------------
         final_output_path = os.path.join(UPLOAD_FOLDER, "output.wav")
         
-        with open(final_output_path, 'wb') as outfile:
+        if len(output_files) == 1:
+            # အပိုင်း ၁ ပိုင်းတည်းဆိုလျှင် တိုက်ရိုက် copy ကူးမည်
+            shutil.copy(output_files[0], final_output_path)
+            os.remove(output_files[0])
+        else:
+            # အပိုင်းများစွာရှိပါက WAV header များကို ညှိ၍ ပေါင်းစပ်မည်
+            data = []
             for fpath in output_files:
-                with open(fpath, 'rb') as infile:
-                    outfile.write(infile.read())
-                # သုံးပြီးသား Temp Audio Chunk ကို ဖျက်ထုတ်ခြင်း
-                try:
-                    os.remove(fpath)
-                except Exception:
-                    pass
+                with wave.open(fpath, 'rb') as w:
+                    data.append((w.getparams(), w.readframes(w.getnframes())))
+                os.remove(fpath)
+
+            with wave.open(final_output_path, 'wb') as output:
+                output.setparams(data[0][0])
+                for params, frames in data:
+                    output.writeframes(frames)
 
         return jsonify({"success": True, "audio_url": "/get-audio/output.wav"})
 
     except Exception as e:
+        # Error တက်ပါက JSON format ဖြင့်သာ ပြန်ပို့ပေးရန်
         return jsonify({"error": f"Backend Error: {str(e)}"}), 500
 
     finally:
-        # Temporary Voice Clone Audio ကို ဖျက်ပစ်ခြင်း
         if ref_file_path and os.path.exists(ref_file_path):
             try:
                 os.remove(ref_file_path)
@@ -128,6 +125,5 @@ def get_audio(filename):
         return jsonify({"error": "Audio file not found"}), 404
 
 if __name__ == "__main__":
-    # Render.com Environment Port ကို ဖတ်ယူခြင်း
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
