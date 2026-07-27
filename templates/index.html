@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VoxCPM Myanmar Studio</title>
+    <title>VoxCPM Myanmar Voice Studio</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -22,8 +23,10 @@
 </head>
 <body class="flex items-center justify-center p-4 sm:p-6">
 
+    <!-- Mobile Card Container -->
     <div class="w-full max-w-md glass-card rounded-3xl p-6 shadow-2xl space-y-6">
         
+        <!-- Header -->
         <div class="text-center space-y-1">
             <div class="inline-flex p-3 bg-indigo-600/20 rounded-2xl text-indigo-400 mb-2">
                 <i class="fa-solid fa-wand-magic-sparkles text-2xl"></i>
@@ -32,8 +35,10 @@
             <p class="text-xs text-slate-400">AI Text-to-Speech & Voice Cloning</p>
         </div>
 
+        <!-- Form Area -->
         <div class="space-y-4">
             
+            <!-- Text Input -->
             <div>
                 <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
                     <i class="fa-solid fa-pen-nib mr-1"></i> စာသား ရိုက်ထည့်ပါ
@@ -43,11 +48,13 @@
                     placeholder="ဒီမှာ ပြောချင်သော စာသားများ ရိုက်ထည့်ပါ..."></textarea>
             </div>
 
+            <!-- Voice Cloning Options -->
             <div>
                 <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                    <i class="fa-solid fa-microphone-lines mr-1"></i> Voice Clone (Optional)
+                    <i class="fa-solid fa-microphone-lines mr-1"></i> VOICE CLONE (OPTIONAL)
                 </label>
                 
+                <!-- Tab Controls -->
                 <div class="grid grid-cols-2 gap-2 p-1 bg-slate-900/60 rounded-xl border border-slate-800 text-xs font-medium">
                     <button id="tab-record-btn" onclick="switchTab('record')" class="py-2 rounded-lg bg-indigo-600 text-white transition">
                         <i class="fa-solid fa-microphone mr-1"></i> အသံဖမ်းမည်
@@ -57,27 +64,47 @@
                     </button>
                 </div>
 
+                <!-- Record Section -->
                 <div id="section-record" class="mt-3 p-4 bg-slate-900/40 border border-slate-800 rounded-2xl text-center space-y-3">
                     <div id="record-status" class="text-xs text-slate-400">မိုက်ခရိုဖုန်းနှိပ်၍ အသံဖမ်းပါ</div>
+                    
                     <div class="flex items-center justify-center gap-3">
-                        <button id="mic-btn" onclick="toggleRecording()" 
+                        <button id="mic-btn" onclick="handleMicClick()" 
                             class="w-12 h-12 rounded-full bg-rose-600 text-white flex items-center justify-center text-lg shadow-lg hover:bg-rose-500 active:scale-95 transition">
                             <i class="fa-solid fa-microphone"></i>
                         </button>
                     </div>
-                    <audio id="recorded-preview" controls class="hidden w-full mt-2 h-8"></audio>
+
+                    <div id="record-player-area" class="hidden space-y-2">
+                        <audio id="recorded-preview" controls class="w-full h-8"></audio>
+                        <button onclick="clearRecordedAudio()" class="text-xs text-rose-400 hover:text-rose-300 transition">
+                            <i class="fa-solid fa-trash-can mr-1"></i> ဖမ်းထားသောအသံကို ရှင်းထုတ်မည်
+                        </button>
+                    </div>
                 </div>
 
+                <!-- Upload Section -->
                 <div id="section-upload" class="hidden mt-3 p-4 bg-slate-900/40 border border-slate-800 rounded-2xl text-center">
                     <input type="file" id="audio-file-input" accept="audio/*" class="hidden" onchange="handleFileSelect(event)">
-                    <label for="audio-file-input" class="cursor-pointer block space-y-2">
-                        <i class="fa-solid fa-file-audio text-2xl text-slate-400"></i>
-                        <div id="file-label" class="text-xs text-slate-400">Audio File (.wav, .mp3) ရွေးချယ်ပါ</div>
-                    </label>
+                    
+                    <div id="upload-select-area">
+                        <label for="audio-file-input" class="cursor-pointer block space-y-2">
+                            <i class="fa-solid fa-file-audio text-2xl text-slate-400"></i>
+                            <div class="text-xs text-slate-400">Audio File (.wav, .mp3, .m4a) ရွေးချယ်ပါ</div>
+                        </label>
+                    </div>
+
+                    <div id="upload-file-info" class="hidden space-y-2">
+                        <div id="file-label" class="text-xs text-indigo-400 font-medium"></div>
+                        <button onclick="clearUploadedFile()" class="text-xs text-rose-400 hover:text-rose-300 transition">
+                            <i class="fa-solid fa-trash-can mr-1"></i> တင်ထားသောဖိုင်ကို ရှင်းထုတ်မည်
+                        </button>
+                    </div>
                 </div>
 
             </div>
 
+            <!-- Generate Button -->
             <button id="generate-btn" onclick="generateSpeech()" 
                 class="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 active:scale-[0.98] text-white font-semibold rounded-2xl shadow-lg transition flex items-center justify-center gap-2">
                 <span>အသံထုတ်လုပ်မည်</span>
@@ -85,6 +112,7 @@
             </button>
         </div>
 
+        <!-- Status & Result Player -->
         <div id="result-area" class="space-y-3 pt-2">
             <div id="status-text" class="text-xs text-center font-medium text-slate-400"></div>
             <div id="audio-container" class="w-full"></div>
@@ -92,13 +120,15 @@
 
     </div>
 
+    <!-- JavaScript Logic -->
     <script>
         let mediaRecorder;
         let audioChunks = [];
         let recordedAudioBlob = null;
         let activeTab = 'record';
+        let isRecording = false;
+        let isCountingDown = false;
 
-        // Tab Switcher
         function switchTab(tab) {
             activeTab = tab;
             const recBtn = document.getElementById('tab-record-btn');
@@ -119,54 +149,111 @@
             }
         }
 
-        // File Select Handler
-        function handleFileSelect(e) {
-            const file = e.target.files[0];
-            const label = document.getElementById('file-label');
-            if (file) {
-                label.innerText = `ရွေးချယ်ထားသောဖိုင်: ${file.name}`;
-                label.classList.add('text-indigo-400');
+        // --- RECORD LOGIC WITH COUNTDOWN ---
+        async function handleMicClick() {
+            if (isCountingDown) return;
+
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startCountdown();
             }
         }
 
-        // Microphone Direct Record
-        async function toggleRecording() {
+        function startCountdown() {
+            isCountingDown = true;
+            const status = document.getElementById('record-status');
+            const micBtn = document.getElementById('mic-btn');
+            let count = 3;
+
+            micBtn.className = "w-12 h-12 rounded-full bg-slate-700 text-white flex items-center justify-center text-lg font-bold";
+            micBtn.innerText = count;
+
+            const timer = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    micBtn.innerText = count;
+                } else {
+                    clearInterval(timer);
+                    isCountingDown = false;
+                    micBtn.innerText = "";
+                    startRecording();
+                }
+            }, 1000);
+        }
+
+        async function startRecording() {
             const micBtn = document.getElementById('mic-btn');
             const status = document.getElementById('record-status');
-            const preview = document.getElementById('recorded-preview');
+            const playerArea = document.getElementById('record-player-area');
 
-            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    audioChunks = [];
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
 
-                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                    mediaRecorder.onstop = () => {
-                        recordedAudioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                        preview.src = URL.createObjectURL(recordedAudioBlob);
-                        preview.classList.remove('hidden');
-                        status.innerText = "အသံဖမ်းယူပြီးပါပြီ!";
-                        status.className = "text-xs text-emerald-400";
-                    };
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    recordedAudioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+                    const preview = document.getElementById('recorded-preview');
+                    preview.src = URL.createObjectURL(recordedAudioBlob);
+                    playerArea.classList.remove('hidden');
+                    status.innerText = "အသံဖမ်းယူပြီးပါပြီ!";
+                    status.className = "text-xs text-emerald-400";
+                };
 
-                    mediaRecorder.start();
-                    micBtn.className = "w-12 h-12 rounded-full bg-amber-500 text-white flex items-center justify-center text-lg shadow-lg animate-pulse";
-                    micBtn.innerHTML = `<i class="fa-solid fa-stop"></i>`;
-                    status.innerText = "အသံဖမ်းနေပါသည်...";
-                    status.className = "text-xs text-amber-400";
-                } catch (err) {
-                    alert("မိုက်ခရိုဖုန်း ခွင့်ပြုချက် မရရှိပါ။");
-                }
-            } else {
-                mediaRecorder.stop();
-                mediaRecorder.stream.getTracks().forEach(track => track.stop());
-                micBtn.className = "w-12 h-12 rounded-full bg-rose-600 text-white flex items-center justify-center text-lg shadow-lg hover:bg-rose-500 active:scale-95 transition";
-                micBtn.innerHTML = `<i class="fa-solid fa-microphone"></i>`;
+                mediaRecorder.start();
+                isRecording = true;
+
+                micBtn.className = "w-12 h-12 rounded-full bg-amber-500 text-white flex items-center justify-center text-lg shadow-lg animate-pulse";
+                micBtn.innerHTML = `<i class="fa-solid fa-stop"></i>`;
+                status.innerText = "အသံဖမ်းနေပါသည်...";
+                status.className = "text-xs text-amber-400";
+
+            } catch (err) {
+                alert("မိုက်ခရိုဖုန်း ခွင့်ပြုချက် မရရှိပါ သို့မဟုတ် မိုက်ခရိုဖုန်း မရှိပါ။");
+                isRecording = false;
             }
         }
 
-        // API Call to Backend
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            }
+            isRecording = false;
+            const micBtn = document.getElementById('mic-btn');
+            micBtn.className = "w-12 h-12 rounded-full bg-rose-600 text-white flex items-center justify-center text-lg shadow-lg hover:bg-rose-500 active:scale-95 transition";
+            micBtn.innerHTML = `<i class="fa-solid fa-microphone"></i>`;
+        }
+
+        function clearRecordedAudio() {
+            recordedAudioBlob = null;
+            document.getElementById('recorded-preview').src = "";
+            document.getElementById('record-player-area').classList.add('hidden');
+            const status = document.getElementById('record-status');
+            status.innerText = "မိုက်ခရိုဖုန်းနှိပ်၍ အသံဖမ်းပါ";
+            status.className = "text-xs text-slate-400";
+        }
+
+        // --- UPLOAD LOGIC ---
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('upload-select-area').classList.add('hidden');
+                document.getElementById('upload-file-info').classList.remove('hidden');
+                document.getElementById('file-label').innerText = `ရွေးထားသောဖိုင်: ${file.name}`;
+            }
+        }
+
+        function clearUploadedFile() {
+            const input = document.getElementById('audio-file-input');
+            input.value = "";
+            document.getElementById('upload-select-area').classList.remove('hidden');
+            document.getElementById('upload-file-info').classList.add('hidden');
+        }
+
+        // --- SUBMIT LOGIC ---
         async function generateSpeech() {
             const text = document.getElementById('text-input').value;
             const statusText = document.getElementById('status-text');
@@ -182,7 +269,7 @@
             formData.append("text", text);
 
             if (activeTab === 'record' && recordedAudioBlob) {
-                formData.append("reference_audio", recordedAudioBlob, "recorded_voice.wav");
+                formData.append("reference_audio", recordedAudioBlob, "recorded_voice.webm");
             } else if (activeTab === 'upload') {
                 const fileInput = document.getElementById('audio-file-input');
                 if (fileInput.files[0]) {
