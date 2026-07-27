@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VoxCPM Myanmar Voice Studio</title>
-    <!-- Tailwind CSS -->
+    <title>VoxCPM Voice Studio Pro</title>
+    <!-- Tailwind CSS & FontAwesome Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -15,7 +15,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
         .glass-card {
-            background: rgba(30, 41, 59, 0.7);
+            background: rgba(30, 41, 59, 0.75);
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
@@ -38,12 +38,15 @@
         <!-- Form Area -->
         <div class="space-y-4">
             
-            <!-- Text Input -->
+            <!-- Text Input with 50,000 Char Limit -->
             <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                    <i class="fa-solid fa-pen-nib mr-1"></i> စာသား ရိုက်ထည့်ပါ
-                </label>
-                <textarea id="text-input" rows="3" 
+                <div class="flex justify-between items-center mb-2">
+                    <label class="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                        <i class="fa-solid fa-pen-nib mr-1"></i> စာသား ရိုက်ထည့်ပါ
+                    </label>
+                    <span id="char-count" class="text-[10px] text-slate-400">0 / 50000</span>
+                </div>
+                <textarea id="text-input" rows="4" maxlength="50000" oninput="updateCharCount()"
                     class="w-full bg-slate-900/80 border border-slate-700/80 rounded-2xl p-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"
                     placeholder="ဒီမှာ ပြောချင်သော စာသားများ ရိုက်ထည့်ပါ..."></textarea>
             </div>
@@ -75,16 +78,18 @@
                         </button>
                     </div>
 
-                    <div id="record-player-area" class="hidden space-y-2">
-                        <audio id="recorded-preview" controls class="w-full h-8"></audio>
+                    <!-- Recorded Audio Preview -->
+                    <div id="record-player-area" class="hidden space-y-2 pt-2 border-t border-slate-800">
+                        <div class="text-[11px] text-slate-400">ဖမ်းထားသော အသံ Preview:</div>
+                        <audio id="recorded-preview" controls class="w-full h-8 rounded-lg"></audio>
                         <button onclick="clearRecordedAudio()" class="text-xs text-rose-400 hover:text-rose-300 transition">
-                            <i class="fa-solid fa-trash-can mr-1"></i> ဖမ်းထားသောအသံကို ရှင်းထုတ်မည်
+                            <i class="fa-solid fa-trash-can mr-1"></i> ဖျက်ထုတ်မည်
                         </button>
                     </div>
                 </div>
 
                 <!-- Upload Section -->
-                <div id="section-upload" class="hidden mt-3 p-4 bg-slate-900/40 border border-slate-800 rounded-2xl text-center">
+                <div id="section-upload" class="hidden mt-3 p-4 bg-slate-900/40 border border-slate-800 rounded-2xl text-center space-y-3">
                     <input type="file" id="audio-file-input" accept="audio/*" class="hidden" onchange="handleFileSelect(event)">
                     
                     <div id="upload-select-area">
@@ -94,10 +99,12 @@
                         </label>
                     </div>
 
-                    <div id="upload-file-info" class="hidden space-y-2">
+                    <!-- Uploaded Audio Preview -->
+                    <div id="upload-file-info" class="hidden space-y-2 border-t border-slate-800 pt-2">
                         <div id="file-label" class="text-xs text-indigo-400 font-medium"></div>
+                        <audio id="uploaded-preview" controls class="w-full h-8 rounded-lg"></audio>
                         <button onclick="clearUploadedFile()" class="text-xs text-rose-400 hover:text-rose-300 transition">
-                            <i class="fa-solid fa-trash-can mr-1"></i> တင်ထားသောဖိုင်ကို ရှင်းထုတ်မည်
+                            <i class="fa-solid fa-trash-can mr-1"></i> ဖျက်ထုတ်မည်
                         </button>
                     </div>
                 </div>
@@ -112,10 +119,12 @@
             </button>
         </div>
 
-        <!-- Status & Result Player -->
+        <!-- Status & Result Player Area -->
         <div id="result-area" class="space-y-3 pt-2">
             <div id="status-text" class="text-xs text-center font-medium text-slate-400"></div>
-            <div id="audio-container" class="w-full"></div>
+            <div id="timer-text" class="text-[11px] text-center font-mono text-indigo-400 hidden"></div>
+            
+            <div id="audio-container" class="w-full space-y-3"></div>
         </div>
 
     </div>
@@ -128,7 +137,15 @@
         let activeTab = 'record';
         let isRecording = false;
         let isCountingDown = false;
+        let timerInterval = null;
 
+        // Character Count Update
+        function updateCharCount() {
+            const text = document.getElementById('text-input').value;
+            document.getElementById('char-count').innerText = `${text.length} / 50000`;
+        }
+
+        // Tab Switcher
         function switchTab(tab) {
             activeTab = tab;
             const recBtn = document.getElementById('tab-record-btn');
@@ -149,7 +166,7 @@
             }
         }
 
-        // --- RECORD LOGIC WITH COUNTDOWN ---
+        // --- RECORD LOGIC WITH PREVIEW & COUNTDOWN ---
         async function handleMicClick() {
             if (isCountingDown) return;
 
@@ -236,27 +253,33 @@
             status.className = "text-xs text-slate-400";
         }
 
-        // --- UPLOAD LOGIC ---
+        // --- UPLOAD LOGIC WITH PREVIEW ---
         function handleFileSelect(e) {
             const file = e.target.files[0];
             if (file) {
                 document.getElementById('upload-select-area').classList.add('hidden');
                 document.getElementById('upload-file-info').classList.remove('hidden');
                 document.getElementById('file-label').innerText = `ရွေးထားသောဖိုင်: ${file.name}`;
+                
+                // Preview Uploaded Audio
+                const uploadedPreview = document.getElementById('uploaded-preview');
+                uploadedPreview.src = URL.createObjectURL(file);
             }
         }
 
         function clearUploadedFile() {
             const input = document.getElementById('audio-file-input');
             input.value = "";
+            document.getElementById('uploaded-preview').src = "";
             document.getElementById('upload-select-area').classList.remove('hidden');
             document.getElementById('upload-file-info').classList.add('hidden');
         }
 
-        // --- SUBMIT LOGIC ---
+        // --- SUBMIT & TIMER LOGIC ---
         async function generateSpeech() {
             const text = document.getElementById('text-input').value;
             const statusText = document.getElementById('status-text');
+            const timerText = document.getElementById('timer-text');
             const btn = document.getElementById('generate-btn');
             const audioContainer = document.getElementById('audio-container');
 
@@ -282,6 +305,23 @@
             btn.disabled = true;
             btn.classList.add('opacity-50');
 
+            // Timer Start
+            let seconds = 0;
+            timerText.classList.remove('hidden');
+            timerText.innerText = `ကြာမြင့်ချိန်: 0 စက္ကန့်`;
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                seconds++;
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                if (mins > 0) {
+                    timerText.innerText = `ကြာမြင့်ချိန်: ${mins} မိနစ် ${secs} စက္ကန့်`;
+                } else {
+                    timerText.innerText = `ကြာမြင့်ချိန်: ${secs} စက္ကန့်`;
+                }
+            }, 1000);
+
             try {
                 const response = await fetch("/generate-audio", {
                     method: "POST",
@@ -289,21 +329,33 @@
                 });
 
                 const data = await response.json();
+                clearInterval(timerInterval);
 
                 if (data.success) {
                     statusText.innerText = "အသံထုတ်ယူခြင်း အောင်မြင်ပါသည်။";
                     statusText.className = "text-xs text-center font-medium text-emerald-400";
+                    
                     const audioUrl = data.audio_url + "?t=" + new Date().getTime();
+                    
+                    // No Autoplay & Add Download Button
                     audioContainer.innerHTML = `
-                        <audio controls autoplay class="w-full rounded-xl bg-slate-900 border border-slate-700">
-                            <source src="${audioUrl}" type="audio/wav">
-                        </audio>
+                        <div class="p-4 bg-slate-900/80 border border-slate-700/80 rounded-2xl space-y-3">
+                            <audio controls class="w-full h-10 rounded-xl">
+                                <source src="${audioUrl}" type="audio/wav">
+                            </audio>
+                            <a href="${data.audio_url}" download="voxcpm_audio.wav" 
+                                class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-download"></i>
+                                <span>အသံဖိုင် ဒေါင်းလုဒ်ဆွဲမည် (.WAV)</span>
+                            </a>
+                        </div>
                     `;
                 } else {
                     statusText.innerText = "အမှားအယွင်း ရှိပါသည်: " + data.error;
                     statusText.className = "text-xs text-center font-medium text-rose-400";
                 }
             } catch (err) {
+                clearInterval(timerInterval);
                 statusText.innerText = "Server ချိတ်ဆက်မှု မအောင်မြင်ပါ: " + err.message;
                 statusText.className = "text-xs text-center font-medium text-rose-400";
             } finally {
