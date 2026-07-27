@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VoxCPM Myanmar Voice</title>
+    <title>Myanmar Voice Studio</title>
     <!-- Tailwind CSS & FontAwesome Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -31,22 +31,22 @@
             <div class="inline-flex p-3 bg-indigo-600/20 rounded-2xl text-indigo-400 mb-2">
                 <i class="fa-solid fa-wand-magic-sparkles text-2xl"></i>
             </div>
-            <h1 class="text-2xl font-bold text-white tracking-wide">VoxCPM Voice Studio</h1>
+            <h1 class="text-2xl font-bold text-white tracking-wide">Myanmar Voice Studio</h1>
             <p class="text-xs text-slate-400">AI Text-to-Speech & Voice Cloning</p>
         </div>
 
         <!-- Form Area -->
         <div class="space-y-4">
             
-            <!-- Text Input with 50,000 Char Limit -->
+            <!-- Text Input with 500 Char Limit -->
             <div>
                 <div class="flex justify-between items-center mb-2">
                     <label class="text-xs font-semibold text-slate-300 uppercase tracking-wider">
                         <i class="fa-solid fa-pen-nib mr-1"></i> စာသား ရိုက်ထည့်ပါ
                     </label>
-                    <span id="char-count" class="text-[10px] text-slate-400">0 / 50000</span>
+                    <span id="char-count" class="text-[10px] text-slate-400">0 / 500</span>
                 </div>
-                <textarea id="text-input" rows="4" maxlength="50000" oninput="updateCharCount()"
+                <textarea id="text-input" rows="4" maxlength="500" oninput="updateCharCount()"
                     class="w-full bg-slate-900/80 border border-slate-700/80 rounded-2xl p-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"
                     placeholder="ဒီမှာ ပြောချင်သော စာသားများ ရိုက်ထည့်ပါ..."></textarea>
             </div>
@@ -142,7 +142,7 @@
         // Character Count Update
         function updateCharCount() {
             const text = document.getElementById('text-input').value;
-            document.getElementById('char-count').innerText = `${text.length} / 50000`;
+            document.getElementById('char-count').innerText = `${text.length} / 500`;
         }
 
         // Tab Switcher
@@ -205,20 +205,17 @@
             const playerArea = document.getElementById('record-player-area');
 
             try {
-                // High Quality & Clear Audio Constraints (ဆူညံသံဖျောက်ပြီး အသံကျယ်ကျယ်ကြည်ကြည်ရစေရန်)
                 const audioConstraints = {
                     audio: {
-                        echoCancellation: true,    // စက်ယောင်သံများ ဖျောက်ရန်
-                        noiseSuppression: true,    // ဘေးပတ်ဝန်းကျင် ဆူညံသံ ဖျောက်ရန်
-                        autoGainControl: true,     // အသံတိုးပါက အလိုအလျောက် ကျယ်ပေးရန်
-                        sampleRate: 44100,          // High Quality Studio Sample Rate
-                        channelCount: 1            // Voice Clone အတွက် Mono Audio
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true,
+                        sampleRate: 44100,
+                        channelCount: 1
                     }
                 };
 
                 const stream = await navigator.mediaDevices.getUserMedia(audioConstraints);
-                
-                // High Bitrate သတ်မှတ်ခြင်း (128kbps)
                 const options = { mimeType: 'audio/webm;codecs=opus', audioBitsPerSecond: 128000 };
                 
                 try {
@@ -281,7 +278,6 @@
                 document.getElementById('upload-file-info').classList.remove('hidden');
                 document.getElementById('file-label').innerText = `ရွေးထားသောဖိုင်: ${file.name}`;
                 
-                // Preview Uploaded Audio
                 const uploadedPreview = document.getElementById('uploaded-preview');
                 uploadedPreview.src = URL.createObjectURL(file);
             }
@@ -335,11 +331,7 @@
                 seconds++;
                 const mins = Math.floor(seconds / 60);
                 const secs = seconds % 60;
-                if (mins > 0) {
-                    timerText.innerText = `ကြာမြင့်ချိန်: ${mins} မိနစ် ${secs} စက္ကန့်`;
-                } else {
-                    timerText.innerText = `ကြာမြင့်ချိန်: ${secs} စက္ကန့်`;
-                }
+                timerText.innerText = mins > 0 ? `ကြာမြင့်ချိန်: ${mins} မိနစ် ${secs} စက္ကန့်` : `ကြာမြင့်ချိန်: ${secs} စက္ကန့်`;
             }, 1000);
 
             try {
@@ -348,7 +340,14 @@
                     body: formData
                 });
 
-                const data = await response.json();
+                const responseText = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    throw new Error("Server တုံ့ပြန်မှု မရရှိပါ။ စာသား အနည်းငယ် တိုပေးပြီး ပြန်စမ်းကြည့်ပါ။");
+                }
+
                 clearInterval(timerInterval);
 
                 if (data.success) {
@@ -357,7 +356,6 @@
                     
                     const audioUrl = data.audio_url + "?t=" + new Date().getTime();
                     
-                    // No Autoplay & Add Download Button
                     audioContainer.innerHTML = `
                         <div class="p-4 bg-slate-900/80 border border-slate-700/80 rounded-2xl space-y-3">
                             <audio controls class="w-full h-10 rounded-xl">
@@ -376,7 +374,7 @@
                 }
             } catch (err) {
                 clearInterval(timerInterval);
-                statusText.innerText = "Server ချိတ်ဆက်မှု မအောင်မြင်ပါ: " + err.message;
+                statusText.innerText = err.message;
                 statusText.className = "text-xs text-center font-medium text-rose-400";
             } finally {
                 btn.disabled = false;
