@@ -6,8 +6,6 @@ import shutil
 app = Flask(__name__)
 
 GRADIO_SPACE = "openbmb/VoxCPM-Demo"
-
-# Audio File များကို ခဏသိမ်းထားမည့် Folder
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -26,12 +24,14 @@ def generate_audio():
 
         ref_file_path = None
         if reference_audio:
-            ref_file_path = os.path.join(UPLOAD_FOLDER, reference_audio.filename)
+            # File နာမည်မရှိပါက default ပေးခြင်း (Direct Mic Record အတွက်)
+            filename = reference_audio.filename or "recorded_voice.wav"
+            ref_file_path = os.path.join(UPLOAD_FOLDER, filename)
             reference_audio.save(ref_file_path)
 
         client = Client(GRADIO_SPACE)
 
-        # Voice Clone အတွက် reference_wav_path_input ထည့်သွင်းခြင်း
+        # Gradio Predict
         result = client.predict(
             text_input=text_input,
             control_instruction="",
@@ -44,18 +44,16 @@ def generate_audio():
             api_name="/generate"
         )
 
-        # Gradio မှ ရလာသော Result Path ကို စစ်ဆေးခြင်း
         audio_path = result if isinstance(result, str) else result.get('path') if isinstance(result, dict) else None
 
         if not audio_path or not os.path.exists(audio_path):
             return jsonify({"error": "Audio File မထုတ်လုပ်နိုင်ပါ။"}), 500
 
-        # Output File ကို App ၏ Upload Folder ထဲသို့ ကူးယူခြင်း
         output_filename = "output.wav"
         destination_path = os.path.join(UPLOAD_FOLDER, output_filename)
         shutil.copy(audio_path, destination_path)
 
-        # Temp File ကို ဖျက်ထုတ်ခြင်း
+        # Clean temp uploaded voice clone file
         if ref_file_path and os.path.exists(ref_file_path):
             os.remove(ref_file_path)
 
@@ -64,7 +62,6 @@ def generate_audio():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Generated Audio ကို Browser သို့ ပို့ပေးသည့် Route
 @app.route("/get-audio/<filename>")
 def get_audio(filename):
     file_path = os.path.join(UPLOAD_FOLDER, filename)
