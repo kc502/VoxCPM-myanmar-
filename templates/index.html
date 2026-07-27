@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VoxCPM Myanmar Studio</title>
+    <title>VoxCPM Myanmar Voice</title>
     <!-- Tailwind CSS & FontAwesome Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -166,7 +166,7 @@
             }
         }
 
-        // --- RECORD LOGIC WITH PREVIEW & COUNTDOWN ---
+        // --- RECORD LOGIC WITH HIGH QUALITY AUDIO & COUNTDOWN ---
         async function handleMicClick() {
             if (isCountingDown) return;
 
@@ -205,8 +205,28 @@
             const playerArea = document.getElementById('record-player-area');
 
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
+                // High Quality & Clear Audio Constraints (ဆူညံသံဖျောက်ပြီး အသံကျယ်ကျယ်ကြည်ကြည်ရစေရန်)
+                const audioConstraints = {
+                    audio: {
+                        echoCancellation: true,    // စက်ယောင်သံများ ဖျောက်ရန်
+                        noiseSuppression: true,    // ဘေးပတ်ဝန်းကျင် ဆူညံသံ ဖျောက်ရန်
+                        autoGainControl: true,     // အသံတိုးပါက အလိုအလျောက် ကျယ်ပေးရန်
+                        sampleRate: 44100,          // High Quality Studio Sample Rate
+                        channelCount: 1            // Voice Clone အတွက် Mono Audio
+                    }
+                };
+
+                const stream = await navigator.mediaDevices.getUserMedia(audioConstraints);
+                
+                // High Bitrate သတ်မှတ်ခြင်း (128kbps)
+                const options = { mimeType: 'audio/webm;codecs=opus', audioBitsPerSecond: 128000 };
+                
+                try {
+                    mediaRecorder = new MediaRecorder(stream, options);
+                } catch (e) {
+                    mediaRecorder = new MediaRecorder(stream);
+                }
+
                 audioChunks = [];
 
                 mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
