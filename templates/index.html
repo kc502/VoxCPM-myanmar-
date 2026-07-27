@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoxCPM Myanmar Voice</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+        textarea { width: 100%; height: 100px; margin-bottom: 10px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+        button:disabled { background: #ccc; }
+        #audio-container { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h2>VoxCPM TTS Demo</h2>
+    <textarea id="text-input" placeholder="ဒီမှာ စာသား ရိုက်ထည့်ပါ..."></textarea><br>
+    <button id="generate-btn" onclick="generateTTS()">အသံထုတ်မည်</button>
+
+    <div id="status" style="margin-top: 10px;"></div>
+    <div id="audio-container"></div>
+
+    <script>
+        async function generateTTS() {
+            const text = document.getElementById("text-input").value;
+            const statusDiv = document.getElementById("status");
+            const btn = document.getElementById("generate-btn");
+            const audioContainer = document.getElementById("audio-container");
+
+            if (!text) {
+                alert("ကျေးဇူးပြု၍ စာသား ရိုက်ထည့်ပါ။");
+                return;
+            }
+
+            statusDiv.innerText = "အသံ ပြောင်းနေပါသည်... ခဏစောင့်ပါ။";
+            btn.disabled = true;
+            audioContainer.innerHTML = "";
+
+            try {
+                const response = await fetch("/generate-audio", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text: text })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    statusDiv.innerText = "ပြီးပါပြီ!";
+                    // Gradio Client မှ ပြန်လာသော Audio URL/Path ကို ဖွင့်ပြခြင်း
+                    const audioUrl = data.audio_result; 
+                    audioContainer.innerHTML = `<audio controls autoplay src="${audioUrl}"></audio>`;
+                } else {
+                    statusDiv.innerText = "အမှားအယွင်း ရှိပါသည်: " + data.error;
+                }
+            } catch (err) {
+                statusDiv.innerText = "Server Error: " + err.message;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
