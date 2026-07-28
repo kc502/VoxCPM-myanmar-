@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Myanmar Voice Studio </title>
+    <title>Myanmar Voice Studio</title>
 
     <!-- Google Font: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -59,10 +59,8 @@
         canvas {
             display: block;
             width: 100%;
-            height: 48px;
+            height: 52px;
         }
-
-        /* ပုံပါအတိုင်း အတိအကျဖြစ်စေမည့် Vibrant Blue Pill Button Style */
         .btn-vibrant-blue {
             background-color: #2563eb;
             box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
@@ -114,14 +112,12 @@
                 
                 <!-- Action Buttons Pair -->
                 <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100/80 rounded-2xl border border-slate-200/60 text-xs font-medium">
-                    <!-- Record Action Button -->
                     <button id="rec-action-btn" onclick="handleMicClick()" 
                         class="py-2.5 rounded-xl bg-white text-slate-900 shadow-sm font-semibold transition hover:bg-slate-50 flex items-center justify-center gap-2">
                         <i id="rec-icon" class="fa-solid fa-microphone text-brand-500"></i>
                         <span id="rec-btn-text">အသံဖမ်းမည်</span>
                     </button>
 
-                    <!-- Upload Action Button -->
                     <label for="audio-file-input" 
                         class="py-2.5 rounded-xl bg-white text-slate-900 shadow-sm font-semibold transition hover:bg-slate-50 flex items-center justify-center gap-2 cursor-pointer">
                         <i class="fa-solid fa-cloud-arrow-up text-brand-500"></i>
@@ -130,31 +126,35 @@
                     <input type="file" id="audio-file-input" accept="audio/*" class="hidden" onchange="handleFileSelect(event)">
                 </div>
 
-                <!-- Live Voice Recording Canvas Visualizer -->
-                <div id="live-visualizer-card" class="hidden mt-3 p-3 bg-slate-900 rounded-2xl space-y-2 border border-slate-800">
+                <!-- Live Wave Recording Canvas Visualizer -->
+                <div id="live-visualizer-card" class="hidden mt-3 p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
                     <div class="flex justify-between items-center px-1">
-                        <span id="live-rec-status" class="text-[11px] font-medium text-amber-400 animate-pulse">
-                            <i class="fa-solid fa-circle text-[8px] mr-1"></i> အသံဖမ်းနေပါသည်...
+                        <span id="live-rec-status" class="text-[11px] font-semibold text-brand-600 animate-pulse">
+                            <i class="fa-solid fa-circle text-[8px] mr-1"></i> အသံဖမ်းယူနေပါသည်...
                         </span>
-                        <span id="rec-timer" class="text-[11px] font-mono text-slate-400">0s</span>
+                        <span id="rec-timer" class="text-[11px] font-mono text-slate-500 font-medium">0s</span>
                     </div>
-                    <canvas id="live-wave-canvas" class="w-full h-12 rounded-lg bg-slate-950/60"></canvas>
+                    <canvas id="live-wave-canvas" class="w-full h-12 rounded-xl bg-white border border-slate-100"></canvas>
                 </div>
 
                 <!-- Voice Clone Audio Waveform Preview Area -->
-                <div id="clone-preview-card" class="hidden mt-3 p-3 bg-slate-50/80 border border-slate-200/80 rounded-2xl space-y-2">
-                    <div class="flex justify-between items-center text-xs text-slate-600 px-1 font-medium">
-                        <span id="clone-file-name" class="truncate max-w-[200px]"><i class="fa-solid fa-waveform mr-1 text-brand-500"></i> Reference Audio</span>
-                        <button onclick="clearCloneAudio()" class="text-rose-500 hover:text-rose-600 transition">
-                            <i class="fa-solid fa-trash-can mr-1"></i> ရှင်းထုတ်မည်
+                <div id="clone-preview-card" class="hidden mt-3 p-3.5 bg-slate-50/80 border border-slate-200/80 rounded-2xl space-y-2.5">
+                    <div class="flex justify-between items-center text-xs text-slate-600 px-1 font-semibold">
+                        <span id="clone-file-name" class="truncate max-w-[200px] flex items-center gap-1.5">
+                            <i class="fa-solid fa-microphone text-brand-500"></i>
+                            <span>ဖမ်းထားသော အသံ (Recorded Voice)</span>
+                        </span>
+                        <button onclick="clearCloneAudio()" class="text-rose-500 hover:text-rose-600 font-medium transition flex items-center gap-1">
+                            <i class="fa-solid fa-trash-can"></i>
+                            <span>ရှင်းထုတ်မည်</span>
                         </button>
                     </div>
                     
-                    <!-- Hugging Face Style Waveform Player -->
-                    <div class="flex items-center gap-3 bg-white p-2.5 rounded-xl border border-slate-200/60">
+                    <!-- Hugging Face Style Waveform Player (With Blue Play Button) -->
+                    <div class="flex items-center gap-3 bg-white p-2.5 rounded-2xl border border-slate-200/80 shadow-sm">
                         <button id="clone-play-btn" onclick="toggleWavePlay(cloneWaveSurfer, 'clone-play-btn')" 
-                            class="w-9 h-9 rounded-full bg-brand-600 text-white flex items-center justify-center shrink-0 shadow-sm hover:bg-brand-700 transition">
-                            <i class="fa-solid fa-play text-xs"></i>
+                            class="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-brand-500/30 hover:bg-brand-700 transition">
+                            <i class="fa-solid fa-play text-sm ml-0.5"></i>
                         </button>
                         <div id="clone-waveform" class="w-full"></div>
                     </div>
@@ -162,7 +162,7 @@
 
             </div>
 
-            <!-- Generate Button (ပုံပါအတိုင်း အတိအကျ ပြင်ဆင်ထားသော Button) -->
+            <!-- Generate Button -->
             <button id="generate-btn" onclick="generateSpeech()" 
                 class="w-full py-4 px-6 btn-vibrant-blue text-white font-semibold rounded-full transition-all duration-200 flex items-center justify-center gap-2.5 text-base tracking-wide">
                 <span>အသံထုတ်လုပ်မည်</span>
@@ -170,28 +170,36 @@
             </button>
         </div>
 
-        <!-- Output Result Waveform Area -->
+        <!-- Output Result Waveform & Progress Bar Area -->
         <div id="result-area" class="space-y-3 pt-2">
-            <div id="status-text" class="text-xs text-center font-medium text-slate-500"></div>
-            <div id="timer-text" class="text-[11px] text-center font-mono text-brand-600 font-medium hidden"></div>
-            
+            <!-- Dynamic Progress Bar (Generate နှိပ်ချိန်တွင်ပေါ်မည်) -->
+            <div id="progress-container" class="hidden space-y-2">
+                <div class="flex justify-between items-center text-xs font-semibold">
+                    <span id="status-text" class="text-brand-600">အသံ ထုတ်လုပ်နေပါသည်...</span>
+                    <span id="timer-text" class="font-mono text-slate-500">0s</span>
+                </div>
+                <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="bg-brand-600 h-full w-0 transition-all duration-300 ease-out rounded-full"></div>
+                </div>
+            </div>
+
+            <!-- Generated Audio Output Card -->
             <div id="output-preview-card" class="hidden p-4 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-3 shadow-sm">
                 <div class="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
                     <i class="fa-solid fa-circle-check text-emerald-500"></i>
                     <span>Generated Audio Output</span>
                 </div>
                 
-                <!-- Hugging Face Style Output Waveform -->
-                <div class="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-200/60">
+                <div class="flex items-center gap-3 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-sm">
                     <button id="output-play-btn" onclick="toggleWavePlay(outputWaveSurfer, 'output-play-btn')" 
-                        class="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center shrink-0 shadow-sm hover:bg-brand-700 transition">
-                        <i class="fa-solid fa-play text-sm"></i>
+                        class="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-600/30 hover:bg-emerald-700 transition">
+                        <i class="fa-solid fa-play text-sm ml-0.5"></i>
                     </button>
                     <div id="output-waveform" class="w-full"></div>
                 </div>
 
                 <a id="download-link" href="#" download="voxcpm_audio.wav" 
-                    class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl transition flex items-center justify-center gap-2 shadow-sm">
+                    class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl transition flex items-center justify-center gap-2 shadow-sm">
                     <i class="fa-solid fa-download"></i>
                     <span>အသံဖိုင် ဒေါင်းလုဒ်ဆွဲမည် (.WAV)</span>
                 </a>
@@ -211,6 +219,7 @@
         let isCountingDown = false;
         let timerInterval = null;
         let recTimerInterval = null;
+        let progressInterval = null;
 
         let audioContext = null;
         let analyserNode = null;
@@ -224,24 +233,26 @@
         });
 
         function initWaveSurfers() {
+            // Clone Waveform Visualizer
             cloneWaveSurfer = WaveSurfer.create({
                 container: '#clone-waveform',
                 waveColor: '#cbd5e1',
                 progressColor: '#2563eb',
-                height: 36,
-                barWidth: 2,
+                height: 40,
+                barWidth: 3,
                 barGap: 2,
-                barRadius: 2,
+                barRadius: 3,
                 cursorWidth: 0
             });
 
             cloneWaveSurfer.on('finish', () => {
-                document.getElementById('clone-play-btn').innerHTML = `<i class="fa-solid fa-play text-xs"></i>`;
+                document.getElementById('clone-play-btn').innerHTML = `<i class="fa-solid fa-play text-sm ml-0.5"></i>`;
             });
 
+            // Output Waveform Visualizer
             outputWaveSurfer = WaveSurfer.create({
                 container: '#output-waveform',
-                waveColor: '#cbd5e1',
+                waveColor: '#a7f3d0',
                 progressColor: '#059669',
                 height: 42,
                 barWidth: 3,
@@ -251,7 +262,7 @@
             });
 
             outputWaveSurfer.on('finish', () => {
-                document.getElementById('output-play-btn').innerHTML = `<i class="fa-solid fa-play text-sm"></i>`;
+                document.getElementById('output-play-btn').innerHTML = `<i class="fa-solid fa-play text-sm ml-0.5"></i>`;
             });
         }
 
@@ -260,10 +271,10 @@
             const btn = document.getElementById(btnId);
             if (wsInstance.isPlaying()) {
                 wsInstance.pause();
-                btn.innerHTML = `<i class="fa-solid fa-play text-xs"></i>`;
+                btn.innerHTML = `<i class="fa-solid fa-play text-sm ml-0.5"></i>`;
             } else {
                 wsInstance.play();
-                btn.innerHTML = `<i class="fa-solid fa-pause text-xs"></i>`;
+                btn.innerHTML = `<i class="fa-solid fa-pause text-sm"></i>`;
             }
         }
 
@@ -283,7 +294,6 @@
 
         function startCountdown() {
             isCountingDown = true;
-            const recBtn = document.getElementById('rec-action-btn');
             const btnText = document.getElementById('rec-btn-text');
             const icon = document.getElementById('rec-icon');
             let count = 3;
@@ -303,8 +313,8 @@
             }, 1000);
         }
 
+        // --- PODCAST STUDIO DSP (200% GAIN + COMPRESSOR + EQ) & RECORDING ---
         async function startRecording() {
-            const recBtn = document.getElementById('rec-action-btn');
             const btnText = document.getElementById('rec-btn-text');
             const icon = document.getElementById('rec-icon');
             const liveVis = document.getElementById('live-visualizer-card');
@@ -322,13 +332,38 @@
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const source = audioContext.createMediaStreamSource(audioStream);
 
-                const gainNode = audioContext.createGain();
-                gainNode.gain.value = 1.5;
+                // 1. High-Pass Filter (Remove Low Rumbling Noise < 80Hz)
+                const hpf = audioContext.createBiquadFilter();
+                hpf.type = "highpass";
+                hpf.frequency.value = 80;
 
+                // 2. High-Shelf EQ (Crisp Podcast Warm Voice Boost at 3kHz)
+                const eq = audioContext.createBiquadFilter();
+                eq.type = "highshelf";
+                eq.frequency.value = 3000;
+                eq.gain.value = 3;
+
+                // 3. Dynamic Range Compressor (Smooth Crisp Audio)
+                const compressor = audioContext.createDynamicsCompressor();
+                compressor.threshold.value = -24;
+                compressor.knee.value = 30;
+                compressor.ratio.value = 12;
+                compressor.attack.value = 0.003;
+                compressor.release.value = 0.25;
+
+                // 4. Gain Node 200% (2.0x Volume Boost)
+                const gainNode = audioContext.createGain();
+                gainNode.gain.value = 2.0;
+
+                // Analyser Node for Live Waveform
                 analyserNode = audioContext.createAnalyser();
                 analyserNode.fftSize = 64;
 
-                source.connect(gainNode);
+                // Connect DSP Chain: Source -> HPF -> EQ -> Compressor -> Gain -> Analyser -> Output Stream
+                source.connect(hpf);
+                hpf.connect(eq);
+                eq.connect(compressor);
+                compressor.connect(gainNode);
                 gainNode.connect(analyserNode);
 
                 const destination = audioContext.createMediaStreamDestination();
@@ -392,6 +427,7 @@
             }
         }
 
+        // Live Center-Aligned Waveform Visualizer Draw Loop
         function drawLiveWaveform() {
             const canvas = document.getElementById('live-wave-canvas');
             const ctx = canvas.getContext('2d');
@@ -404,17 +440,24 @@
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                const barWidth = (canvas.width / bufferLength) * 2;
-                let barHeight;
-                let x = 0;
+                const barWidth = 3;
+                const gap = 2;
+                const totalBarWidth = barWidth + gap;
+                const maxBars = Math.floor(canvas.width / totalBarWidth);
+                const startX = (canvas.width - (maxBars * totalBarWidth)) / 2;
 
-                for (let i = 0; i < bufferLength; i++) {
-                    barHeight = (dataArray[i] / 255) * canvas.height;
+                for (let i = 0; i < maxBars; i++) {
+                    const dataIdx = Math.floor((i / maxBars) * bufferLength);
+                    let barHeight = (dataArray[dataIdx] / 255) * canvas.height * 0.8;
+                    if (barHeight < 3) barHeight = 3;
 
-                    ctx.fillStyle = '#3b82f6';
-                    ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight);
+                    const x = startX + (i * totalBarWidth);
+                    const y = (canvas.height - barHeight) / 2;
 
-                    x += barWidth;
+                    ctx.fillStyle = '#2563eb';
+                    ctx.beginPath();
+                    ctx.roundRect(x, y, barWidth, barHeight, 2);
+                    ctx.fill();
                 }
             }
             renderFrame();
@@ -458,17 +501,32 @@
             }
         }
 
+        // --- SUBMIT WITH AUTO RESET & PROGRESS BAR ANIMATION ---
         async function generateSpeech() {
             const text = document.getElementById('text-input').value;
             const statusText = document.getElementById('status-text');
             const timerText = document.getElementById('timer-text');
             const btn = document.getElementById('generate-btn');
             const outputCard = document.getElementById('output-preview-card');
+            const progressContainer = document.getElementById('progress-container');
+            const progressBar = document.getElementById('progress-bar');
 
             if (!text) {
                 alert("ကျေးဇူးပြု၍ စာသား ရိုက်ထည့်ပါ!");
                 return;
             }
+
+            // 1. Reset Output Preview Card (အရင် အသံဖိုင် ပျောက်သွားစေရန်)
+            outputCard.classList.add('hidden');
+            if (outputWaveSurfer) outputWaveSurfer.empty();
+
+            // 2. Reset & Show Progress Bar
+            progressContainer.classList.remove('hidden');
+            progressBar.style.width = '0%';
+            statusText.innerText = "အသံ ထုတ်လုပ်နေပါသည်... ခဏစောင့်ပါ။";
+            
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
 
             const formData = new FormData();
             formData.append("text", text);
@@ -479,22 +537,27 @@
                 formData.append("reference_audio", selectedFile);
             }
 
-            statusText.innerText = "အသံ ထုတ်လုပ်နေပါသည်... ခဏစောင့်ပါ။";
-            statusText.className = "text-xs text-center font-semibold text-brand-600 animate-pulse";
-            btn.disabled = true;
-            btn.classList.add('opacity-50');
-
+            // Progress Bar Animation & Timer Loop
             let seconds = 0;
-            timerText.classList.remove('hidden');
-            timerText.innerText = `Processing: 0s`;
-            
+            let currentProgress = 0;
+            timerText.innerText = `0s`;
+
             clearInterval(timerInterval);
+            clearInterval(progressInterval);
+
             timerInterval = setInterval(() => {
                 seconds++;
                 const mins = Math.floor(seconds / 60);
                 const secs = seconds % 60;
-                timerText.innerText = mins > 0 ? `Processing Time: ${mins}m ${secs}s` : `Processing Time: ${secs}s`;
+                timerText.innerText = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
             }, 1000);
+
+            progressInterval = setInterval(() => {
+                if (currentProgress < 90) {
+                    currentProgress += (90 - currentProgress) * 0.08;
+                    progressBar.style.width = `${currentProgress}%`;
+                }
+            }, 200);
 
             try {
                 const response = await fetch("/generate-audio", {
@@ -511,13 +574,18 @@
                 }
 
                 clearInterval(timerInterval);
+                clearInterval(progressInterval);
 
                 if (data.success) {
-                    statusText.innerText = "အသံထုတ်ယူခြင်း အောင်မြင်ပါသည်။";
-                    statusText.className = "text-xs text-center font-semibold text-emerald-600";
-                    
+                    // Complete Progress Bar Animation
+                    progressBar.style.width = '100%';
+                    setTimeout(() => {
+                        progressContainer.classList.add('hidden');
+                    }, 600);
+
                     const audioUrl = data.audio_url + "?t=" + new Date().getTime();
                     
+                    // Display Output Waveform Player
                     outputCard.classList.remove('hidden');
                     outputWaveSurfer.load(audioUrl);
 
@@ -525,13 +593,14 @@
                     downloadLink.href = data.audio_url;
 
                 } else {
-                    statusText.innerText = "Error: " + data.error;
-                    statusText.className = "text-xs text-center font-semibold text-rose-500";
+                    progressContainer.classList.add('hidden');
+                    alert("Error: " + data.error);
                 }
             } catch (err) {
                 clearInterval(timerInterval);
-                statusText.innerText = err.message;
-                statusText.className = "text-xs text-center font-semibold text-rose-500";
+                clearInterval(progressInterval);
+                progressContainer.classList.add('hidden');
+                alert(err.message);
             } finally {
                 btn.disabled = false;
                 btn.classList.remove('opacity-50');
