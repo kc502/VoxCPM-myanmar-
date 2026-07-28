@@ -62,15 +62,42 @@
             height: 52px;
         }
         .btn-vibrant-blue {
-            background-color: #2563eb;
+            background-color: #2563eb !important;
             box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
         }
         .btn-vibrant-blue:hover {
-            background-color: #1d4ed8;
+            background-color: #1d4ed8 !important;
             box-shadow: 0 12px 28px -5px rgba(29, 78, 216, 0.5);
         }
-        .btn-vibrant-blue:active {
-            transform: scale(0.98);
+
+        /* Play Button အပြာရောင် အတိအကျဖြစ်စေရန် CSS */
+        .play-btn-blue {
+            background-color: #2563eb !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+        }
+        .play-btn-blue:hover {
+            background-color: #1d4ed8 !important;
+        }
+
+        /* Animated Stripes Progress Bar */
+        @keyframes progress-stripes {
+            from { background-position: 1rem 0; }
+            to { background-position: 0 0; }
+        }
+        .progress-bar-animated {
+            background-image: linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.2) 25%,
+                transparent 25%,
+                transparent 50%,
+                rgba(255, 255, 255, 0.2) 50%,
+                rgba(255, 255, 255, 0.2) 75%,
+                transparent 75%,
+                transparent
+            );
+            background-size: 1rem 1rem;
+            animation: progress-stripes 1s linear infinite;
         }
     </style>
 </head>
@@ -150,10 +177,10 @@
                         </button>
                     </div>
                     
-                    <!-- Hugging Face Style Waveform Player (With Blue Play Button) -->
+                    <!-- Hugging Face Style Waveform Player (အပြာရောင် Play Button) -->
                     <div class="flex items-center gap-3 bg-white p-2.5 rounded-2xl border border-slate-200/80 shadow-sm">
                         <button id="clone-play-btn" onclick="toggleWavePlay(cloneWaveSurfer, 'clone-play-btn')" 
-                            class="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-brand-500/30 hover:bg-brand-700 transition">
+                            class="w-10 h-10 rounded-full play-btn-blue flex items-center justify-center shrink-0 transition">
                             <i class="fa-solid fa-play text-sm ml-0.5"></i>
                         </button>
                         <div id="clone-waveform" class="w-full"></div>
@@ -172,14 +199,15 @@
 
         <!-- Output Result Waveform & Progress Bar Area -->
         <div id="result-area" class="space-y-3 pt-2">
-            <!-- Dynamic Progress Bar (Generate နှိပ်ချိန်တွင်ပေါ်မည်) -->
-            <div id="progress-container" class="hidden space-y-2">
+            
+            <!-- Dynamic Progress Bar (Generate နှိပ်ချိန်တွင် Animated ပြေးနေမည်) -->
+            <div id="progress-container" class="hidden space-y-2 p-3 bg-slate-50 border border-slate-200 rounded-2xl">
                 <div class="flex justify-between items-center text-xs font-semibold">
                     <span id="status-text" class="text-brand-600">အသံ ထုတ်လုပ်နေပါသည်...</span>
                     <span id="timer-text" class="font-mono text-slate-500">0s</span>
                 </div>
-                <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                    <div id="progress-bar" class="bg-brand-600 h-full w-0 transition-all duration-300 ease-out rounded-full"></div>
+                <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-300/60">
+                    <div id="progress-bar" class="bg-brand-600 h-full w-0 progress-bar-animated transition-all duration-300 ease-out rounded-full"></div>
                 </div>
             </div>
 
@@ -192,7 +220,7 @@
                 
                 <div class="flex items-center gap-3 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-sm">
                     <button id="output-play-btn" onclick="toggleWavePlay(outputWaveSurfer, 'output-play-btn')" 
-                        class="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-600/30 hover:bg-emerald-700 transition">
+                        class="w-10 h-10 rounded-full play-btn-blue flex items-center justify-center shrink-0 transition">
                         <i class="fa-solid fa-play text-sm ml-0.5"></i>
                     </button>
                     <div id="output-waveform" class="w-full"></div>
@@ -250,10 +278,11 @@
             });
 
             // Output Waveform Visualizer
+            outputWaveSurfer.on('ready', () => {});
             outputWaveSurfer = WaveSurfer.create({
                 container: '#output-waveform',
-                waveColor: '#a7f3d0',
-                progressColor: '#059669',
+                waveColor: '#cbd5e1',
+                progressColor: '#2563eb',
                 height: 42,
                 barWidth: 3,
                 barGap: 2,
@@ -313,7 +342,6 @@
             }, 1000);
         }
 
-        // --- PODCAST STUDIO DSP (200% GAIN + COMPRESSOR + EQ) & RECORDING ---
         async function startRecording() {
             const btnText = document.getElementById('rec-btn-text');
             const icon = document.getElementById('rec-icon');
@@ -332,18 +360,15 @@
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const source = audioContext.createMediaStreamSource(audioStream);
 
-                // 1. High-Pass Filter (Remove Low Rumbling Noise < 80Hz)
                 const hpf = audioContext.createBiquadFilter();
                 hpf.type = "highpass";
                 hpf.frequency.value = 80;
 
-                // 2. High-Shelf EQ (Crisp Podcast Warm Voice Boost at 3kHz)
                 const eq = audioContext.createBiquadFilter();
                 eq.type = "highshelf";
                 eq.frequency.value = 3000;
                 eq.gain.value = 3;
 
-                // 3. Dynamic Range Compressor (Smooth Crisp Audio)
                 const compressor = audioContext.createDynamicsCompressor();
                 compressor.threshold.value = -24;
                 compressor.knee.value = 30;
@@ -351,15 +376,12 @@
                 compressor.attack.value = 0.003;
                 compressor.release.value = 0.25;
 
-                // 4. Gain Node 200% (2.0x Volume Boost)
                 const gainNode = audioContext.createGain();
                 gainNode.gain.value = 2.0;
 
-                // Analyser Node for Live Waveform
                 analyserNode = audioContext.createAnalyser();
                 analyserNode.fftSize = 64;
 
-                // Connect DSP Chain: Source -> HPF -> EQ -> Compressor -> Gain -> Analyser -> Output Stream
                 source.connect(hpf);
                 hpf.connect(eq);
                 eq.connect(compressor);
@@ -427,7 +449,6 @@
             }
         }
 
-        // Live Center-Aligned Waveform Visualizer Draw Loop
         function drawLiveWaveform() {
             const canvas = document.getElementById('live-wave-canvas');
             const ctx = canvas.getContext('2d');
@@ -501,7 +522,7 @@
             }
         }
 
-        // --- SUBMIT WITH AUTO RESET & PROGRESS BAR ANIMATION ---
+        // --- SUBMIT WITH ANIMATED PROGRESS BAR ---
         async function generateSpeech() {
             const text = document.getElementById('text-input').value;
             const statusText = document.getElementById('status-text');
@@ -516,13 +537,12 @@
                 return;
             }
 
-            // 1. Reset Output Preview Card (အရင် အသံဖိုင် ပျောက်သွားစေရန်)
+            // Reset Output Player & Show Progress Bar
             outputCard.classList.add('hidden');
             if (outputWaveSurfer) outputWaveSurfer.empty();
 
-            // 2. Reset & Show Progress Bar
             progressContainer.classList.remove('hidden');
-            progressBar.style.width = '0%';
+            progressBar.style.width = '5%';
             statusText.innerText = "အသံ ထုတ်လုပ်နေပါသည်... ခဏစောင့်ပါ။";
             
             btn.disabled = true;
@@ -537,9 +557,8 @@
                 formData.append("reference_audio", selectedFile);
             }
 
-            // Progress Bar Animation & Timer Loop
             let seconds = 0;
-            let currentProgress = 0;
+            let currentProgress = 5;
             timerText.innerText = `0s`;
 
             clearInterval(timerInterval);
@@ -552,12 +571,13 @@
                 timerText.innerText = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
             }, 1000);
 
+            // Progress Bar Animation Interpolation
             progressInterval = setInterval(() => {
-                if (currentProgress < 90) {
-                    currentProgress += (90 - currentProgress) * 0.08;
+                if (currentProgress < 92) {
+                    currentProgress += (92 - currentProgress) * 0.05;
                     progressBar.style.width = `${currentProgress}%`;
                 }
-            }, 200);
+            }, 300);
 
             try {
                 const response = await fetch("/generate-audio", {
@@ -577,15 +597,13 @@
                 clearInterval(progressInterval);
 
                 if (data.success) {
-                    // Complete Progress Bar Animation
                     progressBar.style.width = '100%';
                     setTimeout(() => {
                         progressContainer.classList.add('hidden');
-                    }, 600);
+                    }, 500);
 
                     const audioUrl = data.audio_url + "?t=" + new Date().getTime();
                     
-                    // Display Output Waveform Player
                     outputCard.classList.remove('hidden');
                     outputWaveSurfer.load(audioUrl);
 
